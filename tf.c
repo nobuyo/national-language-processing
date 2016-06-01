@@ -132,20 +132,25 @@ int main(int argc, char **argv)    {
     //         while(1) {
     //             if(wordsThis->nextAddr != NULL) {
     //                 if(wordsThis->count < wordsThis->nextAddr->count) {
-    //                     wordsTemp = wordsThis->nextAddr;
-    //                     wordsPre->nextAddr = wordsThis->nextAddr;
-    //                     wordsThis->nextAddr->nextAddr = wordsThis;
-    //                     wordsThis->nextAddr = wordsTemp->nextAddr;
+    //                     wordsTemp = wordsThis;
+
+    //                     wordsThis = wordsTemp->nextAddr;
+
+    //                     wordsTemp->nextAddr = wordsThis->nextAddr;
+                        
+    //                     wordsThis->nextAddr = wordsTemp;
+
+    //                     wordsPre->nextAddr = wordsThis;
+    //                     wordsList = wordsThis;
 
     //                     if(wordsPre == NULL) {
-    //                         wordsPre = wordsThis->nextAddr;
+    //                         wordsPre = wordsThis;
     //                     }
     //                     else {
-    //                         wordsPre->nextAddr = wordsTemp->nextAddr;
+    //                         wordsPre->nextAddr = wordsThis->nextAddr;
     //                     }
     //                     wordsPre = wordsThis;
     //                     wordsThis = wordsThis->nextAddr;
-
     //                 }
     //                 else {
     //                     wordsPre = wordsThis;
