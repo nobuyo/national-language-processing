@@ -32,6 +32,7 @@ int main(int argc, char **argv)    {
     char ch;
     int foundFlag = 0;
     int listLength = 0;
+    int totalCount = 0;
     struct wordsStruct *wordsThis, *wordsNew, *wordsPre, *wordsTemp;
     struct wordsStruct *wordsList = { NULL };
 
@@ -67,8 +68,6 @@ int main(int argc, char **argv)    {
             strncpy(word, node->surface, node->length);
             word[node->length] = '\0'; 
 
-            printf("%s\n", word);
-
             foundFlag = 0;
             wordsThis = wordsList;
             while(1)
@@ -78,7 +77,7 @@ int main(int argc, char **argv)    {
                 }
                 else if(strcmp(wordsThis->word,word) == 0) {
                     foundFlag = 1;
-                    free(word);
+                    // free(word);
                     break;
                 }
                 
@@ -92,7 +91,7 @@ int main(int argc, char **argv)    {
 
             if(foundFlag == 1) {
                 wordsThis->count++;
-                // free(word);
+                free(word);
             }
             else {
                 wordsNew = (struct wordsStruct *)malloc(sizeof(struct wordsStruct));
@@ -107,19 +106,20 @@ int main(int argc, char **argv)    {
                     wordsThis->nextAddr = wordsNew;
                 }
             }
+        }
+    }
 
-            if(wordsList->word != NULL) {
-                wordsThis = wordsList;
-                while(1) {
-                    printf("%s:%d\n", wordsThis->word,wordsThis->count);
-                    listLength++;
-                    if(wordsThis->nextAddr == NULL) {
-                        break;
-                    }
-                    else {
-                        wordsThis = wordsThis->nextAddr;
-                    }
-                }
+    if(wordsList->word != NULL) {
+        wordsThis = wordsList;
+        while(1) {
+            // printf("%s:%d\n", wordsThis->word,wordsThis->count);
+            listLength++;
+            totalCount+=wordsThis->count;
+            if(wordsThis->nextAddr == NULL) {
+                break;
+            }
+            else {
+                wordsThis = wordsThis->nextAddr;
             }
         }
     }
@@ -132,23 +132,24 @@ int main(int argc, char **argv)    {
     //         while(1) {
     //             if(wordsThis->nextAddr != NULL) {
     //                 if(wordsThis->count < wordsThis->nextAddr->count) {
-    //                     wordsTemp = wordsThis;
+    //                     wordsTemp = wordsThis->nextAddr;
+    //                     wordsPre->nextAddr = wordsThis->nextAddr;
     //                     wordsThis->nextAddr->nextAddr = wordsThis;
+    //                     wordsThis->nextAddr = wordsTemp->nextAddr;
+
     //                     if(wordsPre == NULL) {
-    //                 //新しく先頭になるオブジェクトを先頭として登録する
     //                         wordsPre = wordsThis->nextAddr;
     //                     }
     //                     else {
-    //                 //交換後に上位になるオブジェクトを前のオブジェクトのアドレスに登録する
     //                         wordsPre->nextAddr = wordsTemp->nextAddr;
     //                     }
-    //                     wordsPre = wordsThis; //ひとつ前の構造体のアドレスを更新する
-    //                     wordsThis = wordsThis->nextAddr; //ここで参照する構造体のアドレスを更新する
+    //                     wordsPre = wordsThis;
+    //                     wordsThis = wordsThis->nextAddr;
 
     //                 }
     //                 else {
-    //                     wordsPre = wordsThis; //ひとつ前の構造体のアドレスを更新する
-    //                     wordsThis = wordsThis->nextAddr; //ここで参照する構造体のアドレスを更新する
+    //                     wordsPre = wordsThis;
+    //                     wordsThis = wordsThis->nextAddr;
     //                 }
     //             }
     //             else {
@@ -158,6 +159,20 @@ int main(int argc, char **argv)    {
     //     }
     // }
 
+    if(wordsList->word != NULL) {
+        wordsThis = wordsList;
+        while(1) {
+            printf("%s\t%d\t%f\n", wordsThis->word, wordsThis->count ,(float)wordsThis->count/(float)totalCount);
+            if(wordsThis->nextAddr != NULL) {
+                wordsThis = wordsThis->nextAddr;
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+    // free(wordsList);
     mecab_destroy(mecab);
 
     return 0;
