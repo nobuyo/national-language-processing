@@ -9,12 +9,12 @@
         mecab_destroy(mecab); \
         return -1; }
 
-typedef struct
+struct wordsStruct
 {
     char *word;
     int count;
     struct wordsStruct *nextAddr;
-} wordsStruct;
+};
 
 
 int main(int argc, char **argv)    {
@@ -30,8 +30,10 @@ int main(int argc, char **argv)    {
     int fileSize;
     char *string, *word;
     char ch;
-    int foundFlag;
-    wordsStruct *wordsList, *wordsThis, *wordsNew, *wordsPre, *wordsTemp;
+    int foundFlag = 0;
+    int listLength = 0;
+    struct wordsStruct *wordsThis, *wordsNew, *wordsPre, *wordsTemp;
+    struct wordsStruct *wordsList = { NULL };
 
     strcpy(fileName, "./data/001.txt");
     if((file = fopen(fileName, "r"))== NULL) {
@@ -58,11 +60,11 @@ int main(int argc, char **argv)    {
     CHECK(node);
     for (; node; node = node->next) {
         if (node->stat == MECAB_NOR_NODE || node->stat == MECAB_UNK_NODE) {
-            fwrite(node->surface, sizeof(char), node->length, stdout);
-            printf("\t%s\n", node->feature);
+//            fwrite(node->surface, sizeof(char), node->length, stdout);
+//            printf("\t%s\n", node->feature);
 
-            word = (char *)malloc(sizeof(char) * (node->length +1));
-            strncpy(word,node->surface, node->length);
+            word = (char *)malloc(sizeof(char) * (node->length + 1));
+            strncpy(word, node->surface, node->length);
             word[node->length] = '\0'; 
 
             printf("%s\n", word);
@@ -84,34 +86,32 @@ int main(int argc, char **argv)    {
                     break;
                 }
                 else {
-                        
                     wordsThis = wordsThis->nextAddr;
                 }
             }
 
             if(foundFlag == 1) {
                 wordsThis->count++;
-                free(word);
+                // free(word);
             }
             else {
-                wordsNew = (wordsStruct *)malloc(sizeof wordsStruct);
+                wordsNew = (struct wordsStruct *)malloc(sizeof(struct wordsStruct));
                 wordsNew->word = word;
                 wordsNew->count = 1;
                 wordsNew->nextAddr = NULL;
 
                 if(wordsList == NULL) {
                     wordsList = wordsNew;
-                } 
+                }
                 else {
                     wordsThis->nextAddr = wordsNew;
                 }
             }
 
-            int listLength = 0;
             if(wordsList->word != NULL) {
                 wordsThis = wordsList;
                 while(1) {
-                    printf("%s:%d¥n",wordsThis->word,wordsThis->count);
+                    printf("%s:%d\n", wordsThis->word,wordsThis->count);
                     listLength++;
                     if(wordsThis->nextAddr == NULL) {
                         break;
@@ -124,7 +124,40 @@ int main(int argc, char **argv)    {
         }
     }
 
-    
+    // for(i=0; i < listLength; i++) {
+    //     if(wordsList != NULL) {
+    //         wordsThis = wordsList;
+    //         wordsPre = NULL;
+
+    //         while(1) {
+    //             if(wordsThis->nextAddr != NULL) {
+    //                 if(wordsThis->count < wordsThis->nextAddr->count) {
+    //                     wordsTemp = wordsThis;
+    //                     wordsThis->nextAddr->nextAddr = wordsThis;
+    //                     if(wordsPre == NULL) {
+    //                 //新しく先頭になるオブジェクトを先頭として登録する
+    //                         wordsPre = wordsThis->nextAddr;
+    //                     }
+    //                     else {
+    //                 //交換後に上位になるオブジェクトを前のオブジェクトのアドレスに登録する
+    //                         wordsPre->nextAddr = wordsTemp->nextAddr;
+    //                     }
+    //                     wordsPre = wordsThis; //ひとつ前の構造体のアドレスを更新する
+    //                     wordsThis = wordsThis->nextAddr; //ここで参照する構造体のアドレスを更新する
+
+    //                 }
+    //                 else {
+    //                     wordsPre = wordsThis; //ひとつ前の構造体のアドレスを更新する
+    //                     wordsThis = wordsThis->nextAddr; //ここで参照する構造体のアドレスを更新する
+    //                 }
+    //             }
+    //             else {
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
+
     mecab_destroy(mecab);
 
     return 0;
