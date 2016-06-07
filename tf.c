@@ -124,45 +124,32 @@ int main(int argc, char **argv)    {
         }
     }
 
-    // for(i=0; i < listLength; i++) {
-    //     if(wordsList != NULL) {
-    //         wordsThis = wordsList;
-    //         wordsPre = NULL;
+    for(i=0; i < listLength; i++) {
+        if(wordsList != NULL) {
 
-    //         while(1) {
-    //             if(wordsThis->nextAddr != NULL) {
-    //                 if(wordsThis->count < wordsThis->nextAddr->count) {
-    //                     wordsTemp = wordsThis;
+            wordsThis = wordsList;
+            wordsPre = NULL;
 
-    //                     wordsThis = wordsTemp->nextAddr;
+            while(1) {
+                if(wordsThis->nextAddr == NULL) break;
+                if(wordsThis->count < wordsThis->nextAddr->count) {
+                    wordsTemp = wordsThis;
+                    wordsThis = wordsTemp->nextAddr;
+                    wordsTemp->nextAddr = wordsThis->nextAddr;
+                    wordsThis->nextAddr = wordsTemp;
 
-    //                     wordsTemp->nextAddr = wordsThis->nextAddr;
-                        
-    //                     wordsThis->nextAddr = wordsTemp;
-
-    //                     wordsPre->nextAddr = wordsThis;
-    //                     wordsList = wordsThis;
-
-    //                     if(wordsPre == NULL) {
-    //                         wordsPre = wordsThis;
-    //                     }
-    //                     else {
-    //                         wordsPre->nextAddr = wordsThis->nextAddr;
-    //                     }
-    //                     wordsPre = wordsThis;
-    //                     wordsThis = wordsThis->nextAddr;
-    //                 }
-    //                 else {
-    //                     wordsPre = wordsThis;
-    //                     wordsThis = wordsThis->nextAddr;
-    //                 }
-    //             }
-    //             else {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
+                    if(wordsPre == NULL) {
+                        wordsList = wordsThis;
+                    }
+                    else {
+                        wordsPre->nextAddr = wordsThis;
+                    }
+                }
+                wordsPre = wordsThis;
+                wordsThis = wordsThis->nextAddr;
+            }
+        }
+    }
 
     if(wordsList->word != NULL) {
         wordsThis = wordsList;
