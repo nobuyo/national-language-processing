@@ -9,6 +9,8 @@
         mecab_destroy(mecab); \
         return -1; }
 
+#define MAX_FILE_NUM 100
+
 struct wordsStruct
 {
     char *word;
@@ -18,69 +20,110 @@ struct wordsStruct
 
 
 int main(int argc, char **argv)    {
-    char input[] = "すもももももももものうち";
     mecab_t *mecab;
     const mecab_node_t *node;
     const char *result;
     int i;
     size_t len = 3;
     const mecab_dictionary_info_t *d;
-    char fileName[512] = "";
-    FILE *file;
+    FILE *file, *input, *output;
     int fileSize;
     char *string, *word;
     char ch;
     int foundFlag = 0;
     int listLength = 0;
     int totalCount = 0;
+    int fileNum;
     struct wordsStruct *wordsThis, *wordsNew, *wordsPre, *wordsTemp;
-    struct wordsStruct *wordsList = { NULL };
+    char inputFileName[128], outputFileName[128];
 
-    strcpy(fileName, "./data/001.txt");
-    if((file = fopen(fileName, "r"))== NULL) {
-        printf("Can't Open File",fileName);
-        exit;
-    }
-    else {
-        fseek( file, 0, SEEK_END );
-        fileSize = ftell( file );
-        printf( "%s FileSize:%d Byte\n", fileName, fileSize );
-        fseek(file, 0, SEEK_SET); 
-    }
+    for (fileNum = 1; fileNum <= MAX_FILE_NUM; fileNum++) {
 
-    string = (char *)malloc(sizeof(char) * (fileSize+1));
-    for(i=0; (ch = fgetc(file)) != -1;i++) {
-        string[i] = ch;
-    }
-    string[i] = '\0';
+        struct wordsStruct *wordsList = { NULL };
 
-    mecab = mecab_new(argc, argv);
-    CHECK(mecab);
+        listLength = 0;
+        totalCount = 0;
+        sprintf(inputFileName, "./data/%03d.txt", fileNum);
+        sprintf(outputFileName, "./tf_data/tf_%03d.txt", fileNum);
 
-    node = mecab_sparse_tonode(mecab, string);
-    CHECK(node);
-    for (; node; node = node->next) {
-        if (node->stat == MECAB_NOR_NODE || node->stat == MECAB_UNK_NODE) {
-//            fwrite(node->surface, sizeof(char), node->length, stdout);
-//            printf("\t%s\n", node->feature);
+        if((input = fopen(inputFileName, "r"))== NULL) {
+            printf("Can't Open File", inputFileName);
+            exit;
+        }
+        else {
+            fseek( input, 0, SEEK_END );
+            fileSize = ftell( input );
+            printf( "%s FileSize:%d Byte\n", inputFileName, fileSize );
+            fseek(input, 0, SEEK_SET); 
+        }
 
-            word = (char *)malloc(sizeof(char) * (node->length + 1));
-            strncpy(word, node->surface, node->length);
-            word[node->length] = '\0'; 
+        string = (char *)malloc(sizeof(char) * (fileSize+1));
+        for(i=0; (ch = fgetc(input)) != -1;i++) {
+            string[i] = ch;
+        }
+        string[i] = '\0';
 
-            foundFlag = 0;
+        free (input);
+
+        mecab = mecab_new(argc, argv);
+        CHECK(mecab);
+
+        node = mecab_sparse_tonode(mecab, string);
+        CHECK(node);
+        for (; node; node = node->next) {
+            if (node->stat == MECAB_NOR_NODE || node->stat == MECAB_UNK_NODE) {
+
+                word = (char *)malloc(sizeof(char) * (node->length + 1));
+                strncpy(word, node->surface, node->length);
+                word[node->length] = '\0'; 
+
+                foundFlag = 0;
+                wordsThis = wordsList;
+                while(1)
+                {
+                    if(wordsThis == NULL) {
+                        break;
+                    }
+                    else if(strcmp(wordsThis->word, word) == 0) {
+                        foundFlag = 1;
+                        // free(word);
+                        break;
+                    }
+                    
+                    if(wordsThis->nextAddr == NULL) {
+                        break;
+                    }
+                    else {
+                        wordsThis = wordsThis->nextAddr;
+                    }
+                }
+
+                if(foundFlag == 1) {
+                    wordsThis->count++;
+                    free(word);
+                }
+                else {
+                    wordsNew = (struct wordsStruct *)malloc(sizeof(struct wordsStruct));
+                    wordsNew->word = word;
+                    wordsNew->count = 1;
+                    wordsNew->nextAddr = NULL;
+
+                    if(wordsList == NULL) {
+                        wordsList = wordsNew;
+                    }
+                    else {
+                        wordsThis->nextAddr = wordsNew;
+                    }
+                }
+            }
+        }
+
+        if(wordsList->word != NULL) {
             wordsThis = wordsList;
-            while(1)
-            {
-                if(wordsThis == NULL) {
-                    break;
-                }
-                else if(strcmp(wordsThis->word,word) == 0) {
-                    foundFlag = 1;
-                    // free(word);
-                    break;
-                }
-                
+            while(1) {
+                // printf("%s:%d\n", wordsThis->word,wordsThis->count);
+                listLength++;
+                totalCount+=wordsThis->count;
                 if(wordsThis->nextAddr == NULL) {
                     break;
                 }
@@ -88,84 +131,58 @@ int main(int argc, char **argv)    {
                     wordsThis = wordsThis->nextAddr;
                 }
             }
+        }
 
-            if(foundFlag == 1) {
-                wordsThis->count++;
-                free(word);
+        for(i=0; i < listLength; i++) {
+            if(wordsList != NULL) {
+
+                wordsThis = wordsList;
+                wordsPre = NULL;
+
+                while(1) {
+                    if(wordsThis->nextAddr == NULL) break;
+                    if(wordsThis->count < wordsThis->nextAddr->count) {
+                        wordsTemp = wordsThis;
+                        wordsThis = wordsTemp->nextAddr;
+                        wordsTemp->nextAddr = wordsThis->nextAddr;
+                        wordsThis->nextAddr = wordsTemp;
+
+                        if(wordsPre == NULL) {
+                            wordsList = wordsThis;
+                        }
+                        else {
+                            wordsPre->nextAddr = wordsThis;
+                        }
+                    }
+                    wordsPre = wordsThis;
+                    wordsThis = wordsThis->nextAddr;
+                }
             }
-            else {
-                wordsNew = (struct wordsStruct *)malloc(sizeof(struct wordsStruct));
-                wordsNew->word = word;
-                wordsNew->count = 1;
-                wordsNew->nextAddr = NULL;
+        }
 
-                if(wordsList == NULL) {
-                    wordsList = wordsNew;
+        if((output = fopen(outputFileName, "w"))== NULL) {
+            printf("Can't Open File", outputFileName);
+            exit;
+        }
+
+        if(wordsList->word != NULL) {
+            wordsThis = wordsList;
+            while(1) {
+//                printf(         "%s\t%d\t%f\n", wordsThis->word, wordsThis->count ,(float)wordsThis->count/(float)totalCount);
+                fprintf(output, "%s\t%d\t%f\n", wordsThis->word, wordsThis->count ,(float)wordsThis->count/(float)totalCount);
+                if(wordsThis->nextAddr != NULL) {
+                    wordsThis = wordsThis->nextAddr;
                 }
                 else {
-                    wordsThis->nextAddr = wordsNew;
+                    break;
                 }
             }
         }
+
+        free(wordsList);
+        free(output);
+        mecab_destroy(mecab);
     }
-
-    if(wordsList->word != NULL) {
-        wordsThis = wordsList;
-        while(1) {
-            // printf("%s:%d\n", wordsThis->word,wordsThis->count);
-            listLength++;
-            totalCount+=wordsThis->count;
-            if(wordsThis->nextAddr == NULL) {
-                break;
-            }
-            else {
-                wordsThis = wordsThis->nextAddr;
-            }
-        }
-    }
-
-    for(i=0; i < listLength; i++) {
-        if(wordsList != NULL) {
-
-            wordsThis = wordsList;
-            wordsPre = NULL;
-
-            while(1) {
-                if(wordsThis->nextAddr == NULL) break;
-                if(wordsThis->count < wordsThis->nextAddr->count) {
-                    wordsTemp = wordsThis;
-                    wordsThis = wordsTemp->nextAddr;
-                    wordsTemp->nextAddr = wordsThis->nextAddr;
-                    wordsThis->nextAddr = wordsTemp;
-
-                    if(wordsPre == NULL) {
-                        wordsList = wordsThis;
-                    }
-                    else {
-                        wordsPre->nextAddr = wordsThis;
-                    }
-                }
-                wordsPre = wordsThis;
-                wordsThis = wordsThis->nextAddr;
-            }
-        }
-    }
-
-    if(wordsList->word != NULL) {
-        wordsThis = wordsList;
-        while(1) {
-            printf("%s\t%d\t%f\n", wordsThis->word, wordsThis->count ,(float)wordsThis->count/(float)totalCount);
-            if(wordsThis->nextAddr != NULL) {
-                wordsThis = wordsThis->nextAddr;
-            }
-            else {
-                break;
-            }
-        }
-    }
-
-    // free(wordsList);
-    mecab_destroy(mecab);
 
     return 0;
 }
