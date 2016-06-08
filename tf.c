@@ -63,7 +63,7 @@ int main(int argc, char **argv)    {
         }
         string[i] = '\0';
 
-        free (input);
+        fclose(input);
 
         mecab = mecab_new(argc, argv);
         CHECK(mecab);
@@ -86,7 +86,6 @@ int main(int argc, char **argv)    {
                     }
                     else if(strcmp(wordsThis->word, word) == 0) {
                         foundFlag = 1;
-                        // free(word);
                         break;
                     }
                     
@@ -180,7 +179,7 @@ int main(int argc, char **argv)    {
         }
 
         free(wordsList);
-        free(output);
+        fclose(output);
         mecab_destroy(mecab);
     }
 
