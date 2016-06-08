@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include <math.h>
 
 #define MAX_FILE_NUM 100
 
@@ -17,7 +18,6 @@ int main() {
     char *word;
     char string[256];
     char inputFileName[128];
-    char outputFileName[128];
     int i;
     int foundFlag;
     int fileNum;
@@ -30,7 +30,8 @@ int main() {
     struct wordsStruct *wordsTemp;
     struct wordsStruct *wordsList = NULL;
 
-    FILE *textFile;
+    FILE *textFile, *outputFile;
+
 
     for (fileNum = 1; fileNum <= MAX_FILE_NUM; fileNum++) {
 
@@ -126,11 +127,17 @@ int main() {
             }
         }
     }
+
+    if((outputFile = fopen("./idf.txt", "w"))== NULL) {
+        printf("Can't Open File");
+        exit;
+    }
     
     if(wordsList->word != NULL) {
         wordsThis = wordsList;
         while(1) {
-            printf("%s:%d\n", wordsThis->word,wordsThis->count);
+            fprintf(outputFile, "%s\t%d\t%f\n", wordsThis->word,wordsThis->count,log10((double)MAX_FILE_NUM/(double)wordsThis->count)+1);
+            // printf("%s:%d\n", wordsThis->word,wordsThis->count);
             if(wordsThis->nextAddr == NULL) {
                 break;
             }
