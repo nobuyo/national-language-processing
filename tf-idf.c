@@ -34,14 +34,16 @@ int main() {
     int listLength = 0;
     float tfVol = 0;
     float tfWeight = 0;
-    struct wordsStruct *wordsThis;
-    struct wordsStruct *wordsNew;
-    struct wordsStruct *wordsPre;
-    struct wordsStruct *wordsTemp;
-    struct wordsStruct *wordsList = NULL;
+    struct idfStruct *idfThis;
+    struct idfStruct *idfNew;
+    struct idfStruct *idfList = NULL;
+    struct tfStruct *tfThis;
+    struct tfStruct *tfNew;
+    struct tfStruct *tfPre;
+    struct tfStruct *tfTemp;
+    struct tfStruct *tfList = NULL;
 
     FILE *textFile, *outputFile;
-
 
     for (fileNum = 1; fileNum <= MAX_FILE_NUM; fileNum++) {
 
