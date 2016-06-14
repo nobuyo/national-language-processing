@@ -11,7 +11,7 @@ struct idfStruct
 {
     char *word;
     int df;
-    float idfWeigth;
+    float idfWeight;
     struct idfStruct *nextAddr;
 };
 
@@ -19,7 +19,7 @@ struct tfStruct
 {
     char *word;
     int tf;
-    float tfWeigth;
+    float tfWeight;
     float tfidfWeight;
     struct tfStruct *nextAddr;
 };
@@ -32,8 +32,10 @@ int main() {
     int foundFlag;
     int fileNum;
     int listLength = 0;
-    float tfVol = 0;
+    int tfVol = 0;
     float tfWeight = 0;
+    int dfVol;
+    float idfWeight;
     struct idfStruct *idfThis;
     struct idfStruct *idfNew;
     struct idfStruct *idfList = NULL;
@@ -53,47 +55,99 @@ int main() {
             exit;
         }
 
-        while (fscanf(textFile, "%s\t%f\t%f\n", string, &tfVol, &tfWeight) != EOF)
+        while (fscanf(textFile, "%s\t%d\t%f\n", string, &tfVol, &tfWeight) != EOF)
         {
             word = (char *)malloc(sizeof(char) * (strlen(string) + 1));
             strncpy(word, string, strlen(string));
             word[strlen(string)+1] = '\0';
 
             foundFlag = 0;
-            wordsThis = wordsList;
+            tfThis = tfList;
             while(1)
             {
-                if(wordsThis == NULL) {
+                if(tfThis == NULL) {
                     break;
                 }
-                else if(strcmp(wordsThis->word, word) == 0) {
+                else if(strcmp(tfThis->word, word) == 0) {
                     foundFlag = 1;
                     break;
                 }
                 
-                if(wordsThis->nextAddr == NULL) {
+                if(tfThis->nextAddr == NULL) {
                     break;
                 }
                 else {
-                    wordsThis = wordsThis->nextAddr;
+                    tfThis = tfThis->nextAddr;
                 }
             }
 
             if(foundFlag == 1) {
-                wordsThis->count++;
+                continue;
             }
             else {
-                wordsNew = (struct wordsStruct *)malloc(sizeof(struct wordsStruct));
-                wordsNew->word = (char *)malloc(sizeof(char) * strlen(word));
-                wordsNew->word = word;
-                wordsNew->count = 1;
-                wordsNew->nextAddr = NULL;
+                tfNew = (struct tfStruct *)malloc(sizeof(struct tfStruct));
+                tfNew->word = (char *)malloc(sizeof(char) * strlen(word));
+                tfNew->word = word;
+                tfNew->tf = tfVol;
+                tfNew->tfWeight = tfWeight;
+                tfNew->nextAddr = NULL;
 
-                if(wordsList == NULL) {
-                    wordsList = wordsNew;
+                if(tfList == NULL) {
+                    tfList = tfNew;
                 }
                 else {
-                    wordsThis->nextAddr = wordsNew;
+                    tfThis->nextAddr = tfNew;
+                }
+            }
+        }
+
+        strcpy(inputFileName, "./idf.txt");
+        if((textFile = fopen(inputFileName, "r"))== NULL) {
+            printf("Can't Open File");
+            exit;
+        }
+
+        while (fscanf(textFile, "%s\t%d\t%f\n", string, &dfVol, &idfWeight) != EOF)
+        {
+            word = (char *)malloc(sizeof(char) * (strlen(string) + 1));
+            strncpy(word, string, strlen(string));
+            word[strlen(string)+1] = '\0';
+
+            foundFlag = 0;
+            idfThis = idfList;
+            while(1)
+            {
+                if(idfThis == NULL) {
+                    break;
+                }
+                else if(strcmp(idfThis->word, word) == 0) {
+                    foundFlag = 1;
+                    break;
+                }
+                
+                if(idfThis->nextAddr == NULL) {
+                    break;
+                }
+                else {
+                    idfThis = idfThis->nextAddr;
+                }
+            }
+
+            if(foundFlag == 1) {
+                idfThis->count++;
+            }
+            else {
+                idfNew = (struct idfStruct *)malloc(sizeof(struct idfStruct));
+                idfNew->word = (char *)malloc(sizeof(char) * strlen(word));
+                idfNew->word = word;
+                idfNew->count = 1;
+                idfNew->nextAddr = NULL;
+
+                if(idfList == NULL) {
+                    idfList = idfNew;
+                }
+                else {
+                    idfThis->nextAddr = idfNew;
                 }
             }
         }
