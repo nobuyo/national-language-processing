@@ -30,9 +30,11 @@ int main() {
     char *word;
     char string[256];
     char inputFileName[128];
-    int i;
+    char outputFileName[128];
+    int i,j;
     int fileNum;
-    int listLength = 0;
+    int tfListLength = 0;
+    int idfListLength = 0;
     int tfVol = 0;
     float tfWeight = 0;
     int dfVol = 0;
@@ -69,6 +71,8 @@ int main() {
         idfNew->df = dfVol;
         idfNew->idfWeight = idfWeight;
         idfNew->nextAddr = NULL;
+
+        idfListLength++;
 
         if(idfList == NULL) {
             idfList = idfNew;
@@ -108,6 +112,8 @@ int main() {
             tfNew->tfWeight = tfWeight;
             tfNew->nextAddr = NULL;
 
+            tfListLength++;
+
             if(tfList == NULL) {
                 tfList = tfNew;
                 tfThis = tfList;
@@ -121,65 +127,102 @@ int main() {
         }
 
 
-        if(wordsList->word != NULL) {
-            wordsThis = wordsList;
-            while(1) {
-                listLength++;
-                if(wordsThis->nextAddr == NULL) {
+        // if(tfList->word != NULL) {
+        //     tfThis = tfList;
+        //     while(1) {
+        //         listLength++;
+        //         if(tfThis->nextAddr == NULL) {
+        //             break;
+        //         }
+        //         else {
+        //             tfThis = tfThis->nextAddr;
+        //         }
+        //     }
+        // }
+
+        // if (tfList->word != NULL)  tfThis = tfList;
+        // if (idfList->word != NULL) idfThis = idfList;
+        // while (tfThis != NULL) {
+        //     if (tfThis == NULL)
+        //         break;
+        //     while (idfThis != NULL) {
+        //         if (strcmp(tfThis->word,idfThis->word) == 0) {
+        //             tfThis->tfidfWeight = tfThis->tfWeight * idfThis->idfWeight;
+        //             break;
+        //         }
+        //         else {
+        //             idfThis = idfThis->nextAddr;
+        //         }
+        //     }
+        //     tfThis = tfThis->nextAddr;
+        // }
+
+        tfThis = tfList;
+        for (i=0; i<tfListLength; i++) {
+            idfThis = idfList;
+            if (tfThis == NULL) break;
+            for (j=0; j<idfListLength; j++) {
+                if (idfThis == NULL) break;
+                if (strcmp(tfThis->word, idfThis->word) == 0) {
+                    tfThis->tfidfWeight = tfThis->tfWeight * idfThis->idfWeight;
                     break;
                 }
                 else {
-                    wordsThis = wordsThis->nextAddr;
+                    idfThis = idfThis->nextAddr;
+                }
+            }
+            tfThis = tfThis->nextAddr;
+        }
+
+        for(i=0; i < tfListLength; i++) {
+            if(tfList != NULL) {
+
+                tfThis = tfList;
+                tfPre = NULL;
+
+                while(1) {
+                    if(tfThis->nextAddr == NULL) break;
+                    if(tfThis->tfidfWeight < tfThis->nextAddr->tfidfWeight) {
+                        tfTemp = tfThis;
+                        tfThis = tfTemp->nextAddr;
+                        tfTemp->nextAddr = tfThis->nextAddr;
+                        tfThis->nextAddr = tfTemp;
+
+                        if(tfPre == NULL) {
+                            tfList = tfThis;
+                        }
+                        else {
+                            tfPre->nextAddr = tfThis;
+                        }
+                    }
+                    tfPre = tfThis;
+                    tfThis = tfThis->nextAddr;
                 }
             }
         }
 
-    // for(i=0; i < listLength; i++) {
-    //     if(wordsList != NULL) {
-
-    //         wordsThis = wordsList;
-    //         wordsPre = NULL;
-
-    //         while(1) {
-    //             if(wordsThis->nextAddr == NULL) break;
-    //             if(wordsThis->count < wordsThis->nextAddr->count) {
-    //                 wordsTemp = wordsThis;
-    //                 wordsThis = wordsTemp->nextAddr;
-    //                 wordsTemp->nextAddr = wordsThis->nextAddr;
-    //                 wordsThis->nextAddr = wordsTemp;
-
-    //                 if(wordsPre == NULL) {
-    //                     wordsList = wordsThis;
-    //                 }
-    //                 else {
-    //                     wordsPre->nextAddr = wordsThis;
-    //                 }
-    //             }
-    //             wordsPre = wordsThis;
-    //             wordsThis = wordsThis->nextAddr;
-    //         }
-    //     }
-    // }
-
-    // if((outputFile = fopen("./idf.txt", "w"))== NULL) {
-    //     printf("Can't Open File");
-    //     exit;
-    // }
-    
-    if(idfList->word != NULL) {
-        idfThis = idfList;
-        while(1) {
-            // fprintf(outputFile, "%s\t%d\t%f\n", wordsThis->word,wordsThis->count,log10((double)MAX_FILE_NUM/(double)wordsThis->count)+1);
-            printf("%s\n", idfThis->word);
-            if(idfThis->nextAddr == NULL) {
-                break;
-            }
-            else {
-                idfThis = idfThis->nextAddr;
+        sprintf(outputFileName, "./tfidf_data/tfidf_%03d.txt", fileNum);
+        if((outputFile = fopen(outputFileName, "w")) == NULL) {
+            printf("Can't Open File");
+            exit;
+        }
+        
+        if(tfList->word != NULL) {
+            tfThis = tfList;
+            while(1) {
+                fprintf(outputFile, "%s\t%d\t%f\t%f\n", tfThis->word,tfThis->tf,tfThis->tfWeight,tfThis->tfidfWeight);
+                // printf("%s\n", idfThis->word);
+                if(tfThis->nextAddr == NULL) {
+                    break;
+                }
+                else {
+                    tfThis = tfThis->nextAddr;
+                }
             }
         }
-    }
 
+        fclose(outputFile);
+    }
 
     return 0;
 
