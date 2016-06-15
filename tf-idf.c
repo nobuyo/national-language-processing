@@ -63,28 +63,28 @@ int main() {
 
             foundFlag = 0;
             tfThis = tfList;
-            while(1)
-            {
-                if(tfThis == NULL) {
-                    break;
-                }
-                else if(strcmp(tfThis->word, word) == 0) {
-                    foundFlag = 1;
-                    break;
-                }
+            // while(1)
+            // {
+            //     if(tfThis == NULL) {
+            //         break;
+            //     }
+            //     else if(strcmp(tfThis->word, word) == 0) {
+            //         foundFlag = 1;
+            //         break;
+            //     }
                 
-                if(tfThis->nextAddr == NULL) {
-                    break;
-                }
-                else {
-                    tfThis = tfThis->nextAddr;
-                }
-            }
+            //     if(tfThis->nextAddr == NULL) {
+            //         break;
+            //     }
+            //     else {
+            //         tfThis = tfThis->nextAddr;
+            //     }
+            // }
 
-            if(foundFlag == 1) {
-                continue;
-            }
-            else {
+            // if(foundFlag == 1) {
+            //     continue;
+            // }
+            // else {
                 tfNew = (struct tfStruct *)malloc(sizeof(struct tfStruct));
                 tfNew->word = (char *)malloc(sizeof(char) * strlen(word));
                 tfNew->word = word;
@@ -98,7 +98,7 @@ int main() {
                 else {
                     tfThis->nextAddr = tfNew;
                 }
-            }
+            // }
         }
 
         strcpy(inputFileName, "./idf.txt");
@@ -113,30 +113,30 @@ int main() {
             strncpy(word, string, strlen(string));
             word[strlen(string)+1] = '\0';
 
-            foundFlag = 0;
-            idfThis = idfList;
-            while(1)
-            {
-                if(idfThis == NULL) {
-                    break;
-                }
-                else if(strcmp(idfThis->word, word) == 0) {
-                    foundFlag = 1;
-                    break;
-                }
+            // foundFlag = 0;
+            // idfThis = idfList;
+            // while(1)
+            // {
+            //     if(idfThis == NULL) {
+            //         break;
+            //     }
+            //     else if(strcmp(idfThis->word, word) == 0) {
+            //         foundFlag = 1;
+            //         break;
+            //     }
                 
-                if(idfThis->nextAddr == NULL) {
-                    break;
-                }
-                else {
-                    idfThis = idfThis->nextAddr;
-                }
-            }
+            //     if(idfThis->nextAddr == NULL) {
+            //         break;
+            //     }
+            //     else {
+            //         idfThis = idfThis->nextAddr;
+            //     }
+            // }
 
-            if(foundFlag == 1) {
-                idfThis->count++;
-            }
-            else {
+            // if(foundFlag == 1) {
+            //     idfThis->count++;
+            // }
+            // else {
                 idfNew = (struct idfStruct *)malloc(sizeof(struct idfStruct));
                 idfNew->word = (char *)malloc(sizeof(char) * strlen(word));
                 idfNew->word = word;
@@ -149,7 +149,7 @@ int main() {
                 else {
                     idfThis->nextAddr = idfNew;
                 }
-            }
+            // }
         }
     }
 
